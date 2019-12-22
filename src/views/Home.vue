@@ -25,7 +25,7 @@ export default class Home extends Vue {
 
   get result() {
     let keys = Object.keys(this.dictionary);
-    let nk = keys.filter(i => i.indexOf(this.plain) > 0);
+    let nk = keys.filter(i => i.indexOf(this.plain) >= 0);
     return nk;
   }
 
