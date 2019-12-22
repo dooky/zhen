@@ -1,6 +1,8 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import fs from 'fs'
+import path from 'path'
+import { app, protocol, BrowserWindow, ipcMain as ipc } from 'electron'
 import {
   createProtocol,
   installVueDevtools
@@ -9,24 +11,29 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 
 let win: BrowserWindow | null
 
-// Scheme must be registered before the app is ready
-protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }])
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'app',
+    privileges: { secure: true, standard: true }
+  }
+])
 
 function createWindow() {
-  // Create the browser window.
   win = new BrowserWindow({
-    width: 800, height: 600, webPreferences: {
+    width: 800,
+    height: 600,
+    webPreferences: {
       nodeIntegration: true
     }
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    if (!process.env.IS_TEST) {
+      win.webContents.openDevTools()
+    }
   } else {
     createProtocol('app')
-    // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
 
@@ -51,10 +58,18 @@ app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
 
   }
+  ipc.on('load', () => {
+    let filename = path.resolve(__dirname, '..', 'public', 'dictionary.json')
+    fs.readFile(filename, 'utf-8', (err, data) => {
+      let dictionary = JSON.parse(data);
+      if (win != null) {
+        win.webContents.send('load', dictionary);
+      }
+    });
+  });
   createWindow()
 })
 
-// Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
     process.on('message', data => {
