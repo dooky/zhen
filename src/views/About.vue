@@ -1,5 +1,5 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <h1>zhen 是一个英文词典</h1>
   </div>
 </template>
