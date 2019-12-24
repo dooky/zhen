@@ -13,7 +13,8 @@
       </el-table>
     </div>
     <el-pagination
-      :small="true"
+      layout="prev, pager, next, jumper, ->, sizes, total"
+      :pager-count="5"
       :current-page.sync="page"
       :page-size.sync="size"
       :page-sizes="[50, 100, 200, 300]"
@@ -34,22 +35,12 @@ export default class Home extends Vue {
   plain: string = "";
   words: Array<any> = [];
 
-  get groups(): Array<Array<any>> {
+  get group(): Array<any> {
     let count = Math.floor(this.all.length / this.size);
     let tail = this.all.length % this.size;
-    let result = [];
-    for (let i = 0; i < count; ++i) {
-      let start = i * this.size;
-      let end = (i + 1) * this.size - 1;
-      let group = this.all.slice(start, end);
-      result.push(group);
-    }
-    result.push(this.all.slice(count * this.size, count * this.size + tail));
-    return result;
-  }
-
-  get group(): Array<any> {
-    return this.groups[this.page - 1];
+    let start = (this.page - 1) * this.size;
+    let end = start + (this.page >= count ? tail : this.size);
+    return this.all.slice(start, end);
   }
 
   get all(): Array<any> {
